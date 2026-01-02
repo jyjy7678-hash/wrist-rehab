@@ -1,4 +1,4 @@
-const CACHE = "wrist-rehab-v1";
+const CACHE = "wrist-rehab-v2";
 const ASSETS = ["./index.html","./manifest.webmanifest","./sw.js"];
 
 self.addEventListener("install", (e) => {
@@ -15,8 +15,6 @@ self.addEventListener("activate", (e) => {
 
 self.addEventListener("fetch", (e) => {
   e.respondWith(
-    caches.match(e.request).then(r => r || fetch(e.request).then(resp => {
-      return resp;
-    }).catch(()=>caches.match("./index.html")))
+    caches.match(e.request).then(r => r || fetch(e.request).catch(()=>caches.match("./index.html")))
   );
 });
