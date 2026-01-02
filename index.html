@@ -2,10 +2,13 @@
 <html lang="ko">
 <head>
   <meta charset="utf-8" />
+
+  <!-- ✅ iOS 홈화면(standalone)에서 화면 맞춤 핵심 -->
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#0b1220" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
   <title>손목 재활 체크</title>
   <link rel="manifest" href="manifest.webmanifest">
 
@@ -13,21 +16,39 @@
     :root{
       --bg:#0b1220; --card:#111a2d; --muted:#93a4c7; --text:#e8eefc; --line:#223052;
       --primary:#2563eb; --danger:#b91c1c; --good:#22c55e; --warn:#f59e0b;
+
       --sa-top: env(safe-area-inset-top, 0px);
       --sa-bottom: env(safe-area-inset-bottom, 0px);
       --sa-left: env(safe-area-inset-left, 0px);
       --sa-right: env(safe-area-inset-right, 0px);
+
+      /* ✅ iOS 높이 보정 변수 (JS로 설정) */
+      --vh: 1vh;
     }
+
     *{ box-sizing:border-box; }
     html, body { height: 100%; }
+
     body{
       margin:0;
       font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",Segoe UI,Roboto,sans-serif;
       background:linear-gradient(180deg,#071023,#0b1220);
       color:var(--text);
-      /* iPhone home indicator safe area */
+
+      /* iPhone safe area */
       padding-left: var(--sa-left);
       padding-right: var(--sa-right);
+
+      /* ✅ iOS에서 홈화면 실행 시 스크롤 바운스/잘림 완화 */
+      overscroll-behavior-y: none;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* ✅ 화면비율/높이 문제 해결용 최상위 래퍼 */
+    .app{
+      min-height: calc(var(--vh) * 100);
+      display:flex;
+      flex-direction:column;
     }
 
     header{
@@ -60,6 +81,8 @@
       max-width:980px;
       margin:0 auto;
       padding:14px;
+
+      /* ✅ 홈 인디케이터 영역 확보 */
       padding-bottom: calc(18px + var(--sa-bottom));
     }
 
@@ -126,7 +149,7 @@
     .m.part{ background:var(--warn); border-color:var(--warn); }
     .today{ outline:2px solid rgba(37,99,235,.65); }
 
-    /* Bottom status (safe & subtle) */
+    /* Bottom status */
     .status{
       margin-top:10px;
       font-size:12px;
@@ -181,14 +204,28 @@
     .gList li{ margin:6px 0; line-height:1.35; }
     .muted{ color:var(--muted); }
 
-    /* Standalone(홈화면)에서 여백/느낌 개선 */
     @media (display-mode: standalone){
       body{ background:linear-gradient(180deg,#060c1a,#0b1220); }
     }
   </style>
+
+  <!-- ✅ iOS “홈화면 실행”에서 100vh 오작동 잡는 핵심 JS -->
+  <script>
+    function setVH(){
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
+    }
+    window.addEventListener('resize', setVH);
+    window.addEventListener('orientationchange', setVH);
+    document.addEventListener('visibilitychange', () => { if(!document.hidden) setVH(); });
+    setVH();
+  </script>
 </head>
 
 <body>
+  <!-- ✅ 전체를 .app으로 감싸서 높이 보정 적용 -->
+  <div class="app">
+
 <header>
   <div class="titleRow">
     <div>
@@ -500,7 +537,7 @@
     saveData(data);
     progressKpi.textContent = calcDone(data.days[ymd(selectedDate)]) + "/3";
     statusBar.textContent = "저장됨 · " + new Date().toLocaleTimeString();
-    renderCalendar(); // 캘린더 표시 갱신
+    renderCalendar();
   }
 
   Object.values(fields).forEach(el=>{
@@ -688,6 +725,7 @@
     statusBar.textContent = "준비됨";
   })();
 </script>
+
+  </div> <!-- /.app -->
 </body>
 </html>
-
