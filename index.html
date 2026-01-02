@@ -1,0 +1,554 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#111827" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>손목 재활 체크</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <style>
+    :root { --bg:#0b1220; --card:#111a2d; --muted:#93a4c7; --text:#e8eefc; --line:#223052; }
+    *{ box-sizing:border-box; }
+    body{ margin:0; font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", Segoe UI, Roboto, sans-serif;
+      background:linear-gradient(180deg,#071023,#0b1220); color:var(--text); }
+    header{ position:sticky; top:0; background:rgba(11,18,32,.85); backdrop-filter: blur(10px);
+      padding:14px 16px; border-bottom:1px solid rgba(255,255,255,.06); z-index:10;}
+    .title{ font-size:18px; font-weight:700; }
+    .sub{ font-size:12px; color:var(--muted); margin-top:4px; }
+    .wrap{ max-width:980px; margin:0 auto; padding:16px; padding-bottom:90px;}
+    .grid{ display:grid; gap:12px; }
+    @media (min-width: 920px){ .grid{ grid-template-columns: 1.1fr .9fr; } }
+    .card{ background:rgba(17,26,45,.92); border:1px solid rgba(255,255,255,.08); border-radius:16px; padding:14px; box-shadow: 0 10px 30px rgba(0,0,0,.25); }
+    .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    .sp{ justify-content:space-between; }
+    .btn{ background:#1f2a44; border:1px solid rgba(255,255,255,.10); color:var(--text); padding:10px 12px; border-radius:12px; font-weight:600; cursor:pointer;}
+    .btn:active{ transform: translateY(1px); }
+    .btn.primary{ background:#2563eb; border-color:#2563eb; }
+    .btn.danger{ background:#b91c1c; border-color:#b91c1c; }
+    .pill{ display:inline-flex; gap:6px; align-items:center; padding:6px 10px; border-radius:999px; background:#0f172a; border:1px solid rgba(255,255,255,.10); color:var(--muted); font-size:12px; }
+    .h2{ font-size:14px; font-weight:800; margin:0 0 10px 0; color:#dbe7ff; }
+    label{ font-size:12px; color:var(--muted); display:block; margin-bottom:6px;}
+    input[type="time"], input[type="number"], textarea, select{
+      width:100%; background:#0f172a; border:1px solid rgba(255,255,255,.10); color:var(--text);
+      border-radius:12px; padding:10px; outline:none;
+    }
+    textarea{ min-height:74px; resize:vertical; }
+    .cols{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .check{ width:18px; height:18px; accent-color:#2563eb; }
+    .sep{ height:1px; background:rgba(255,255,255,.08); margin:12px 0; }
+    .kpi{ font-size:26px; font-weight:900; letter-spacing:-0.5px;}
+    .kpiSub{ font-size:12px; color:var(--muted); margin-top:2px;}
+    .calHead{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px;}
+    .month{ font-weight:900; }
+    .cal{ display:grid; grid-template-columns: repeat(7, 1fr); gap:8px; }
+    .dow{ font-size:11px; color:var(--muted); text-align:center; padding:2px 0; }
+    .day{ background:#0f172a; border:1px solid rgba(255,255,255,.08); border-radius:14px; padding:10px; min-height:74px; cursor:pointer; }
+    .day.off{ opacity:.35; }
+    .day .d{ font-size:12px; color:var(--muted); }
+    .marks{ display:flex; gap:4px; margin-top:8px; }
+    .m{ width:10px; height:10px; border-radius:4px; border:1px solid rgba(255,255,255,.14); background:transparent; }
+    .m.on{ background:#22c55e; border-color:#22c55e; }
+    .m.part{ background:#f59e0b; border-color:#f59e0b; }
+    .today{ outline:2px solid rgba(37,99,235,.65); }
+    .footbar{ position:fixed; bottom:0; left:0; right:0; background:rgba(11,18,32,.9); backdrop-filter: blur(10px);
+      border-top:1px solid rgba(255,255,255,.06); padding:10px 14px; }
+    .footbar .wrap2{ max-width:980px; margin:0 auto; display:flex; gap:10px; align-items:center; justify-content:space-between;}
+    .mini{ font-size:12px; color:var(--muted); }
+    .tag{ font-size:12px; padding:6px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.10); background:#0f172a; color:var(--muted); }
+  </style>
+</head>
+<body>
+<header>
+  <div class="title">손목 재활 체크</div>
+  <div class="sub">1일 3회(각 60분) + 특이사항 1줄 · 데이터는 내 폰에만 저장</div>
+</header>
+
+<div class="wrap">
+  <div class="grid">
+
+    <!-- LEFT: Today -->
+    <section class="card" id="todayCard">
+      <div class="row sp">
+        <div>
+          <div class="h2">오늘 기록</div>
+          <div class="pill" id="todayLabel"></div>
+        </div>
+        <button class="btn" id="btnToday">오늘로</button>
+      </div>
+
+      <div class="sep"></div>
+
+      <div class="row sp">
+        <div>
+          <div class="kpi" id="progressKpi">0/3</div>
+          <div class="kpiSub">오늘 완료 세션 수</div>
+        </div>
+        <div class="row">
+          <span class="tag" id="goalTag">목표: 3회</span>
+          <button class="btn danger" id="btnResetDay">오늘 초기화</button>
+        </div>
+      </div>
+
+      <div class="sep"></div>
+
+      <div class="grid" style="grid-template-columns:1fr; gap:12px;">
+        <div class="card" style="background:rgba(15,23,42,.65);">
+          <div class="row sp">
+            <div class="h2" style="margin:0;">1회차</div>
+            <label class="row" style="gap:8px; margin:0;">
+              <input class="check" type="checkbox" id="s1_done" />
+              완료
+            </label>
+          </div>
+          <div class="cols">
+            <div>
+              <label>시작</label>
+              <input type="time" id="s1_start" />
+            </div>
+            <div>
+              <label>종료</label>
+              <input type="time" id="s1_end" />
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="background:rgba(15,23,42,.65);">
+          <div class="row sp">
+            <div class="h2" style="margin:0;">2회차</div>
+            <label class="row" style="gap:8px; margin:0;">
+              <input class="check" type="checkbox" id="s2_done" />
+              완료
+            </label>
+          </div>
+          <div class="cols">
+            <div>
+              <label>시작</label>
+              <input type="time" id="s2_start" />
+            </div>
+            <div>
+              <label>종료</label>
+              <input type="time" id="s2_end" />
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="background:rgba(15,23,42,.65);">
+          <div class="row sp">
+            <div class="h2" style="margin:0;">3회차</div>
+            <label class="row" style="gap:8px; margin:0;">
+              <input class="check" type="checkbox" id="s3_done" />
+              완료
+            </label>
+          </div>
+          <div class="cols">
+            <div>
+              <label>시작</label>
+              <input type="time" id="s3_start" />
+            </div>
+            <div>
+              <label>종료</label>
+              <input type="time" id="s3_end" />
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label>특이사항 (한 줄)</label>
+          <textarea id="note" placeholder="예: 2회차 회전 시 척골 통증↑ / 컨디션↓로 강도 낮춤"></textarea>
+        </div>
+
+        <div class="row sp">
+          <button class="btn primary" id="btnSave">저장</button>
+          <span class="mini" id="saveHint">자동 저장: ON</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT: Calendar + Weekly angles -->
+    <section class="card">
+      <div class="calHead">
+        <button class="btn" id="prevMonth">◀</button>
+        <div class="month" id="monthLabel">2025년 1월</div>
+        <button class="btn" id="nextMonth">▶</button>
+      </div>
+
+      <div class="cal">
+        <div class="dow">일</div><div class="dow">월</div><div class="dow">화</div><div class="dow">수</div><div class="dow">목</div><div class="dow">금</div><div class="dow">토</div>
+      </div>
+      <div class="cal" id="calendar"></div>
+
+      <div class="sep"></div>
+
+      <div class="row sp">
+        <div>
+          <div class="h2">📐 주간 각도 체크 (선택)</div>
+          <div class="mini">주 1회 정도만 기록 권장</div>
+        </div>
+        <button class="btn" id="btnSaveAngles">각도 저장</button>
+      </div>
+
+      <div class="cols">
+        <div>
+          <label>주차 (예: 6주차)</label>
+          <input type="text" id="wk_label" placeholder="예: 6주차" />
+        </div>
+        <div>
+          <label>회전 변화</label>
+          <select id="wk_rot">
+            <option value="">선택</option>
+            <option value="증가">증가</option>
+            <option value="동일">동일</option>
+            <option value="감소">감소</option>
+          </select>
+        </div>
+      </div>
+      <div class="cols" style="margin-top:10px;">
+        <div>
+          <label>굴곡(°)</label>
+          <input type="number" id="wk_flex" min="0" max="180" placeholder="예: 35" />
+        </div>
+        <div>
+          <label>신전(°)</label>
+          <input type="number" id="wk_ext" min="0" max="180" placeholder="예: 20" />
+        </div>
+      </div>
+      <div style="margin-top:10px;">
+        <label>느낌 한 줄</label>
+        <input type="text" id="wk_note" placeholder="예: 저항이 덜하고 끝범위 유지가 쉬움" />
+      </div>
+
+      <div class="sep"></div>
+
+      <div class="row sp">
+        <button class="btn danger" id="btnExport">데이터 내보내기(JSON)</button>
+        <button class="btn" id="btnImport">데이터 가져오기</button>
+      </div>
+      <input type="file" id="importFile" accept="application/json" style="display:none;" />
+    </section>
+
+  </div>
+</div>
+
+<div class="footbar">
+  <div class="wrap2">
+    <div class="mini" id="statusBar">준비됨</div>
+    <div class="row">
+      <button class="btn" id="btnInstallHint">홈 화면 추가 안내</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const STORAGE_KEY = "wristRehab_v1";
+
+  function pad(n){ return String(n).padStart(2,"0"); }
+  function ymd(d){
+    const dt = new Date(d);
+    return dt.getFullYear()+"-"+pad(dt.getMonth()+1)+"-"+pad(dt.getDate());
+  }
+  function parseYMD(s){
+    const [y,m,d] = s.split("-").map(Number);
+    return new Date(y, m-1, d);
+  }
+  function monthKey(y,m){ return y+"-"+pad(m+1); }
+
+  const defaultData = { days: {}, weeklyAngles: [] };
+
+  function loadData(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : structuredClone(defaultData);
+    }catch(e){
+      return structuredClone(defaultData);
+    }
+  }
+  function saveData(data){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  }
+
+  let data = loadData();
+  let selectedDate = new Date();
+  let viewYear = 2025;
+  let viewMonth = 0; // Jan
+
+  // ---------- UI refs ----------
+  const todayLabel = document.getElementById("todayLabel");
+  const progressKpi = document.getElementById("progressKpi");
+  const monthLabel = document.getElementById("monthLabel");
+  const calendarEl = document.getElementById("calendar");
+  const statusBar = document.getElementById("statusBar");
+
+  const fields = {
+    s1_start: document.getElementById("s1_start"),
+    s1_end: document.getElementById("s1_end"),
+    s1_done: document.getElementById("s1_done"),
+    s2_start: document.getElementById("s2_start"),
+    s2_end: document.getElementById("s2_end"),
+    s2_done: document.getElementById("s2_done"),
+    s3_start: document.getElementById("s3_start"),
+    s3_end: document.getElementById("s3_end"),
+    s3_done: document.getElementById("s3_done"),
+    note: document.getElementById("note"),
+  };
+
+  const wk = {
+    label: document.getElementById("wk_label"),
+    rot: document.getElementById("wk_rot"),
+    flex: document.getElementById("wk_flex"),
+    ext: document.getElementById("wk_ext"),
+    note: document.getElementById("wk_note"),
+  };
+
+  function ensureDay(key){
+    if(!data.days[key]){
+      data.days[key] = {
+        sessions: [
+          {start:"", end:"", done:false},
+          {start:"", end:"", done:false},
+          {start:"", end:"", done:false},
+        ],
+        note: ""
+      };
+    }
+    return data.days[key];
+  }
+
+  function calcDone(day){
+    const d = day?.sessions || [];
+    return d.filter(s=>s.done).length;
+  }
+
+  function renderToday(){
+    const key = ymd(selectedDate);
+    todayLabel.textContent = key;
+    const day = ensureDay(key);
+
+    fields.s1_start.value = day.sessions[0].start || "";
+    fields.s1_end.value = day.sessions[0].end || "";
+    fields.s1_done.checked = !!day.sessions[0].done;
+
+    fields.s2_start.value = day.sessions[1].start || "";
+    fields.s2_end.value = day.sessions[1].end || "";
+    fields.s2_done.checked = !!day.sessions[1].done;
+
+    fields.s3_start.value = day.sessions[2].start || "";
+    fields.s3_end.value = day.sessions[2].end || "";
+    fields.s3_done.checked = !!day.sessions[2].done;
+
+    fields.note.value = day.note || "";
+
+    progressKpi.textContent = calcDone(day) + "/3";
+    highlightCalendar();
+  }
+
+  function readFormToData(){
+    const key = ymd(selectedDate);
+    const day = ensureDay(key);
+    day.sessions[0] = { start: fields.s1_start.value, end: fields.s1_end.value, done: fields.s1_done.checked };
+    day.sessions[1] = { start: fields.s2_start.value, end: fields.s2_end.value, done: fields.s2_done.checked };
+    day.sessions[2] = { start: fields.s3_start.value, end: fields.s3_end.value, done: fields.s3_done.checked };
+    day.note = fields.note.value || "";
+  }
+
+  function autoSave(){
+    readFormToData();
+    saveData(data);
+    progressKpi.textContent = calcDone(data.days[ymd(selectedDate)]) + "/3";
+    statusBar.textContent = "저장됨 · " + new Date().toLocaleTimeString();
+    highlightCalendar();
+  }
+
+  // Autosave on changes
+  Object.values(fields).forEach(el=>{
+    el.addEventListener("input", autoSave);
+    el.addEventListener("change", autoSave);
+  });
+
+  // Manual save
+  document.getElementById("btnSave").addEventListener("click", ()=>{
+    autoSave();
+    alert("저장 완료");
+  });
+
+  // Reset day
+  document.getElementById("btnResetDay").addEventListener("click", ()=>{
+    if(!confirm("오늘 기록을 초기화할까요?")) return;
+    const key = ymd(selectedDate);
+    data.days[key] = {
+      sessions:[{start:"",end:"",done:false},{start:"",end:"",done:false},{start:"",end:"",done:false}],
+      note:""
+    };
+    saveData(data);
+    renderToday();
+    statusBar.textContent = "오늘 초기화됨";
+  });
+
+  document.getElementById("btnToday").addEventListener("click", ()=>{
+    selectedDate = new Date();
+    renderToday();
+  });
+
+  // -------- Calendar ----------
+  function renderCalendar(){
+    calendarEl.innerHTML = "";
+    monthLabel.textContent = `${viewYear}년 ${viewMonth+1}월`;
+
+    const first = new Date(viewYear, viewMonth, 1);
+    const startDay = first.getDay(); // 0=Sun
+    const daysInMonth = new Date(viewYear, viewMonth+1, 0).getDate();
+    const prevDays = new Date(viewYear, viewMonth, 0).getDate();
+
+    // 6 rows x 7 = 42 cells
+    for(let i=0;i<42;i++){
+      const cell = document.createElement("div");
+      cell.className = "day";
+
+      let dayNum, cellDate, off=false;
+
+      if(i < startDay){
+        dayNum = prevDays - (startDay - 1 - i);
+        cellDate = new Date(viewYear, viewMonth-1, dayNum);
+        off = true;
+      }else if(i >= startDay + daysInMonth){
+        dayNum = i - (startDay + daysInMonth) + 1;
+        cellDate = new Date(viewYear, viewMonth+1, dayNum);
+        off = true;
+      }else{
+        dayNum = i - startDay + 1;
+        cellDate = new Date(viewYear, viewMonth, dayNum);
+      }
+
+      const key = ymd(cellDate);
+      const day = data.days[key];
+      const doneCount = day ? calcDone(day) : 0;
+
+      const d = document.createElement("div");
+      d.className = "d";
+      d.textContent = dayNum;
+      cell.appendChild(d);
+
+      const marks = document.createElement("div");
+      marks.className = "marks";
+
+      // 3 small squares (done / partial)
+      for(let k=0;k<3;k++){
+        const m = document.createElement("div");
+        m.className = "m";
+        if(day){
+          if(day.sessions[k]?.done) m.classList.add("on");
+          else if(day.sessions[k]?.start || day.sessions[k]?.end) m.classList.add("part");
+        }
+        marks.appendChild(m);
+      }
+      cell.appendChild(marks);
+
+      if(off) cell.classList.add("off");
+
+      const today = new Date();
+      if(ymd(today) === key) cell.classList.add("today");
+
+      cell.addEventListener("click", ()=>{
+        selectedDate = cellDate;
+        // if clicking off-month, jump month view too
+        viewYear = selectedDate.getFullYear();
+        viewMonth = selectedDate.getMonth();
+        renderCalendar();
+        renderToday();
+      });
+
+      calendarEl.appendChild(cell);
+    }
+
+    highlightCalendar();
+  }
+
+  function highlightCalendar(){
+    // optional: could highlight selected day visually by re-rendering,
+    // but we keep it simple to avoid heavy DOM. (calendar already shows today outline)
+  }
+
+  document.getElementById("prevMonth").addEventListener("click", ()=>{
+    viewMonth--;
+    if(viewMonth<0){ viewMonth=11; viewYear--; }
+    renderCalendar();
+  });
+  document.getElementById("nextMonth").addEventListener("click", ()=>{
+    viewMonth++;
+    if(viewMonth>11){ viewMonth=0; viewYear++; }
+    renderCalendar();
+  });
+
+  // -------- Weekly angles ----------
+  document.getElementById("btnSaveAngles").addEventListener("click", ()=>{
+    const item = {
+      date: ymd(new Date()),
+      weekLabel: wk.label.value || "",
+      flex: wk.flex.value ? Number(wk.flex.value) : null,
+      ext: wk.ext.value ? Number(wk.ext.value) : null,
+      rot: wk.rot.value || "",
+      note: wk.note.value || ""
+    };
+    data.weeklyAngles.push(item);
+    saveData(data);
+    statusBar.textContent = "각도 기록 저장됨";
+    alert("주간 각도 기록 저장 완료");
+  });
+
+  // -------- Export / Import ----------
+  document.getElementById("btnExport").addEventListener("click", ()=>{
+    const blob = new Blob([JSON.stringify(data, null, 2)], {type:"application/json"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "wrist-rehab-backup.json";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+
+  document.getElementById("btnImport").addEventListener("click", ()=>{
+    document.getElementById("importFile").click();
+  });
+
+  document.getElementById("importFile").addEventListener("change", async (e)=>{
+    const file = e.target.files?.[0];
+    if(!file) return;
+    try{
+      const txt = await file.text();
+      const obj = JSON.parse(txt);
+      if(!obj || typeof obj !== "object") throw new Error("invalid");
+      data = obj;
+      saveData(data);
+      renderCalendar();
+      renderToday();
+      alert("가져오기 완료");
+    }catch(err){
+      alert("가져오기 실패: 파일이 올바른 JSON이 아닙니다.");
+    }finally{
+      e.target.value = "";
+    }
+  });
+
+  // -------- Install hint ----------
+  document.getElementById("btnInstallHint").addEventListener("click", ()=>{
+    alert("아이폰 Safari에서 열기 → 공유 버튼 → '홈 화면에 추가'를 누르면 앱처럼 사용할 수 있어요.");
+  });
+
+  // Service worker register
+  if("serviceWorker" in navigator){
+    navigator.serviceWorker.register("./sw.js").catch(()=>{});
+  }
+
+  // init
+  (function init(){
+    const now = new Date();
+    selectedDate = now;
+    viewYear = now.getFullYear();
+    viewMonth = now.getMonth();
+    renderCalendar();
+    renderToday();
+    statusBar.textContent = "준비됨";
+  })();
+</script>
+</body>
+</html>

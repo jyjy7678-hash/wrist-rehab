@@ -1,0 +1,9 @@
+{
+  "name": "손목 재활 체크",
+  "short_name": "재활체크",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0b1220",
+  "theme_color": "#111827",
+  "icons": []
+}
