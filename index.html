@@ -3,87 +3,214 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <meta name="theme-color" content="#111827" />
+  <meta name="theme-color" content="#0b1220" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>손목 재활 체크</title>
   <link rel="manifest" href="manifest.webmanifest">
+
   <style>
-    :root { --bg:#0b1220; --card:#111a2d; --muted:#93a4c7; --text:#e8eefc; --line:#223052; }
+    :root{
+      --bg:#0b1220; --card:#111a2d; --muted:#93a4c7; --text:#e8eefc; --line:#223052;
+      --primary:#2563eb; --danger:#b91c1c; --good:#22c55e; --warn:#f59e0b;
+      --sa-top: env(safe-area-inset-top, 0px);
+      --sa-bottom: env(safe-area-inset-bottom, 0px);
+      --sa-left: env(safe-area-inset-left, 0px);
+      --sa-right: env(safe-area-inset-right, 0px);
+    }
     *{ box-sizing:border-box; }
-    body{ margin:0; font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", Segoe UI, Roboto, sans-serif;
-      background:linear-gradient(180deg,#071023,#0b1220); color:var(--text); }
-    header{ position:sticky; top:0; background:rgba(11,18,32,.85); backdrop-filter: blur(10px);
-      padding:14px 16px; border-bottom:1px solid rgba(255,255,255,.06); z-index:10;}
-    .title{ font-size:18px; font-weight:700; }
-    .sub{ font-size:12px; color:var(--muted); margin-top:4px; }
-    .wrap{ max-width:980px; margin:0 auto; padding:16px; padding-bottom:90px;}
-    .grid{ display:grid; gap:12px; }
-    @media (min-width: 920px){ .grid{ grid-template-columns: 1.1fr .9fr; } }
-    .card{ background:rgba(17,26,45,.92); border:1px solid rgba(255,255,255,.08); border-radius:16px; padding:14px; box-shadow: 0 10px 30px rgba(0,0,0,.25); }
+    html, body { height: 100%; }
+    body{
+      margin:0;
+      font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",Segoe UI,Roboto,sans-serif;
+      background:linear-gradient(180deg,#071023,#0b1220);
+      color:var(--text);
+      /* iPhone home indicator safe area */
+      padding-left: var(--sa-left);
+      padding-right: var(--sa-right);
+    }
+
+    header{
+      position:sticky; top:0; z-index:20;
+      background:rgba(11,18,32,.88);
+      backdrop-filter: blur(12px);
+      border-bottom:1px solid rgba(255,255,255,.08);
+      padding: calc(12px + var(--sa-top)) 14px 12px 14px;
+    }
+    .titleRow{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+    .title{ font-size:18px; font-weight:900; letter-spacing:-0.2px; }
+    .sub{ font-size:12px; color:var(--muted); margin-top:6px; line-height:1.35; }
+    .btn{
+      background:#1f2a44; border:1px solid rgba(255,255,255,.10);
+      color:var(--text); padding:10px 12px; border-radius:12px;
+      font-weight:700; cursor:pointer; white-space:nowrap;
+    }
+    .btn:active{ transform:translateY(1px); }
+    .btn.primary{ background:var(--primary); border-color:var(--primary); }
+    .btn.danger{ background:var(--danger); border-color:var(--danger); }
+    .btn.ghost{ background:transparent; }
+    .pill{
+      display:inline-flex; gap:6px; align-items:center;
+      padding:6px 10px; border-radius:999px;
+      background:#0f172a; border:1px solid rgba(255,255,255,.10);
+      color:var(--muted); font-size:12px;
+    }
+
+    .wrap{
+      max-width:980px;
+      margin:0 auto;
+      padding:14px;
+      padding-bottom: calc(18px + var(--sa-bottom));
+    }
+
+    /* Mobile-first: 1 column */
+    .grid{ display:grid; gap:12px; grid-template-columns: 1fr; }
+    @media (min-width: 920px){
+      .grid{ grid-template-columns: 1.1fr .9fr; }
+    }
+
+    .card{
+      background:rgba(17,26,45,.94);
+      border:1px solid rgba(255,255,255,.09);
+      border-radius:16px;
+      padding:14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.22);
+    }
+    .card.soft{ background:rgba(15,23,42,.68); }
     .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
     .sp{ justify-content:space-between; }
-    .btn{ background:#1f2a44; border:1px solid rgba(255,255,255,.10); color:var(--text); padding:10px 12px; border-radius:12px; font-weight:600; cursor:pointer;}
-    .btn:active{ transform: translateY(1px); }
-    .btn.primary{ background:#2563eb; border-color:#2563eb; }
-    .btn.danger{ background:#b91c1c; border-color:#b91c1c; }
-    .pill{ display:inline-flex; gap:6px; align-items:center; padding:6px 10px; border-radius:999px; background:#0f172a; border:1px solid rgba(255,255,255,.10); color:var(--muted); font-size:12px; }
-    .h2{ font-size:14px; font-weight:800; margin:0 0 10px 0; color:#dbe7ff; }
-    label{ font-size:12px; color:var(--muted); display:block; margin-bottom:6px;}
-    input[type="time"], input[type="number"], textarea, select{
-      width:100%; background:#0f172a; border:1px solid rgba(255,255,255,.10); color:var(--text);
-      border-radius:12px; padding:10px; outline:none;
-    }
-    textarea{ min-height:74px; resize:vertical; }
-    .cols{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-    .check{ width:18px; height:18px; accent-color:#2563eb; }
+    .h2{ font-size:14px; font-weight:900; margin:0 0 10px 0; color:#dbe7ff; }
     .sep{ height:1px; background:rgba(255,255,255,.08); margin:12px 0; }
-    .kpi{ font-size:26px; font-weight:900; letter-spacing:-0.5px;}
-    .kpiSub{ font-size:12px; color:var(--muted); margin-top:2px;}
-    .calHead{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px;}
-    .month{ font-weight:900; }
+    .kpi{ font-size:28px; font-weight:950; letter-spacing:-0.6px; }
+    .kpiSub{ font-size:12px; color:var(--muted); margin-top:2px; }
+
+    label{ font-size:12px; color:var(--muted); display:block; margin-bottom:6px; }
+    input[type="time"], input[type="number"], input[type="text"], textarea, select{
+      width:100%;
+      background:#0f172a;
+      border:1px solid rgba(255,255,255,.12);
+      color:var(--text);
+      border-radius:12px;
+      padding:12px 12px;
+      outline:none;
+      font-size:16px; /* iOS zoom 방지 */
+    }
+    textarea{ min-height:76px; resize:vertical; }
+
+    .cols{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    @media (max-width: 380px){
+      .cols{ grid-template-columns:1fr; }
+    }
+
+    .check{ width:20px; height:20px; accent-color:var(--primary); }
+    .tag{
+      font-size:12px; padding:6px 10px; border-radius:999px;
+      border:1px solid rgba(255,255,255,.10);
+      background:#0f172a; color:var(--muted);
+    }
+
+    /* Calendar */
+    .calHead{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px; }
+    .month{ font-weight:950; }
     .cal{ display:grid; grid-template-columns: repeat(7, 1fr); gap:8px; }
     .dow{ font-size:11px; color:var(--muted); text-align:center; padding:2px 0; }
-    .day{ background:#0f172a; border:1px solid rgba(255,255,255,.08); border-radius:14px; padding:10px; min-height:74px; cursor:pointer; }
+    .day{
+      background:#0f172a; border:1px solid rgba(255,255,255,.08);
+      border-radius:14px; padding:10px; min-height:74px; cursor:pointer;
+    }
     .day.off{ opacity:.35; }
     .day .d{ font-size:12px; color:var(--muted); }
     .marks{ display:flex; gap:4px; margin-top:8px; }
     .m{ width:10px; height:10px; border-radius:4px; border:1px solid rgba(255,255,255,.14); background:transparent; }
-    .m.on{ background:#22c55e; border-color:#22c55e; }
-    .m.part{ background:#f59e0b; border-color:#f59e0b; }
+    .m.on{ background:var(--good); border-color:var(--good); }
+    .m.part{ background:var(--warn); border-color:var(--warn); }
     .today{ outline:2px solid rgba(37,99,235,.65); }
-    .footbar{ position:fixed; bottom:0; left:0; right:0; background:rgba(11,18,32,.9); backdrop-filter: blur(10px);
-      border-top:1px solid rgba(255,255,255,.06); padding:10px 14px; }
-    .footbar .wrap2{ max-width:980px; margin:0 auto; display:flex; gap:10px; align-items:center; justify-content:space-between;}
-    .mini{ font-size:12px; color:var(--muted); }
-    .tag{ font-size:12px; padding:6px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.10); background:#0f172a; color:var(--muted); }
+
+    /* Bottom status (safe & subtle) */
+    .status{
+      margin-top:10px;
+      font-size:12px;
+      color:var(--muted);
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+      opacity:.95;
+    }
+
+    /* Guide modal */
+    .modalBack{
+      position:fixed; inset:0;
+      background:rgba(0,0,0,.55);
+      display:none;
+      align-items:flex-end;
+      justify-content:center;
+      z-index:50;
+      padding: calc(10px + var(--sa-bottom)) 12px;
+    }
+    .modal{
+      width:min(860px, 100%);
+      background:rgba(17,26,45,.98);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:18px;
+      box-shadow:0 20px 50px rgba(0,0,0,.40);
+      overflow:hidden;
+    }
+    .modalTop{
+      padding:14px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+    }
+    .modalBody{
+      max-height: 70vh;
+      overflow:auto;
+      padding:14px;
+    }
+    .guideBox{
+      background:#0f172a;
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:14px;
+      padding:12px;
+      margin-bottom:10px;
+    }
+    .gTitle{ font-weight:900; margin:0 0 8px 0; }
+    .gList{ margin:0; padding-left:18px; color:var(--text); }
+    .gList li{ margin:6px 0; line-height:1.35; }
+    .muted{ color:var(--muted); }
+
+    /* Standalone(홈화면)에서 여백/느낌 개선 */
+    @media (display-mode: standalone){
+      body{ background:linear-gradient(180deg,#060c1a,#0b1220); }
+    }
   </style>
 </head>
+
 <body>
 <header>
-  <div class="title">손목 재활 체크</div>
-  <div class="sub">1일 3회(각 60분) + 특이사항 1줄 · 데이터는 내 폰에만 저장</div>
+  <div class="titleRow">
+    <div>
+      <div class="title">손목 재활 체크</div>
+      <div class="sub">1일 3회(각 60분) + 특이사항 1줄 · 데이터는 내 폰에만 저장</div>
+    </div>
+    <div class="row" style="gap:8px;">
+      <button class="btn" id="btnGuide">기본 운동 지침</button>
+      <button class="btn" id="btnToday">오늘로</button>
+    </div>
+  </div>
 </header>
 
 <div class="wrap">
   <div class="grid">
 
-    <!-- LEFT: Today -->
+    <!-- Today -->
     <section class="card" id="todayCard">
       <div class="row sp">
         <div>
           <div class="h2">오늘 기록</div>
           <div class="pill" id="todayLabel"></div>
-        </div>
-        <button class="btn" id="btnToday">오늘로</button>
-      </div>
-
-      <div class="sep"></div>
-
-      <div class="row sp">
-        <div>
-          <div class="kpi" id="progressKpi">0/3</div>
-          <div class="kpiSub">오늘 완료 세션 수</div>
         </div>
         <div class="row">
           <span class="tag" id="goalTag">목표: 3회</span>
@@ -93,64 +220,53 @@
 
       <div class="sep"></div>
 
-      <div class="grid" style="grid-template-columns:1fr; gap:12px;">
-        <div class="card" style="background:rgba(15,23,42,.65);">
+      <div class="row sp">
+        <div>
+          <div class="kpi" id="progressKpi">0/3</div>
+          <div class="kpiSub">오늘 완료 세션 수</div>
+        </div>
+        <button class="btn primary" id="btnSave">저장</button>
+      </div>
+
+      <div class="sep"></div>
+
+      <div class="grid" style="gap:12px;">
+        <div class="card soft">
           <div class="row sp">
             <div class="h2" style="margin:0;">1회차</div>
             <label class="row" style="gap:8px; margin:0;">
-              <input class="check" type="checkbox" id="s1_done" />
-              완료
+              <input class="check" type="checkbox" id="s1_done" /> 완료
             </label>
           </div>
           <div class="cols">
-            <div>
-              <label>시작</label>
-              <input type="time" id="s1_start" />
-            </div>
-            <div>
-              <label>종료</label>
-              <input type="time" id="s1_end" />
-            </div>
+            <div><label>시작</label><input type="time" id="s1_start" /></div>
+            <div><label>종료</label><input type="time" id="s1_end" /></div>
           </div>
         </div>
 
-        <div class="card" style="background:rgba(15,23,42,.65);">
+        <div class="card soft">
           <div class="row sp">
             <div class="h2" style="margin:0;">2회차</div>
             <label class="row" style="gap:8px; margin:0;">
-              <input class="check" type="checkbox" id="s2_done" />
-              완료
+              <input class="check" type="checkbox" id="s2_done" /> 완료
             </label>
           </div>
           <div class="cols">
-            <div>
-              <label>시작</label>
-              <input type="time" id="s2_start" />
-            </div>
-            <div>
-              <label>종료</label>
-              <input type="time" id="s2_end" />
-            </div>
+            <div><label>시작</label><input type="time" id="s2_start" /></div>
+            <div><label>종료</label><input type="time" id="s2_end" /></div>
           </div>
         </div>
 
-        <div class="card" style="background:rgba(15,23,42,.65);">
+        <div class="card soft">
           <div class="row sp">
             <div class="h2" style="margin:0;">3회차</div>
             <label class="row" style="gap:8px; margin:0;">
-              <input class="check" type="checkbox" id="s3_done" />
-              완료
+              <input class="check" type="checkbox" id="s3_done" /> 완료
             </label>
           </div>
           <div class="cols">
-            <div>
-              <label>시작</label>
-              <input type="time" id="s3_start" />
-            </div>
-            <div>
-              <label>종료</label>
-              <input type="time" id="s3_end" />
-            </div>
+            <div><label>시작</label><input type="time" id="s3_start" /></div>
+            <div><label>종료</label><input type="time" id="s3_end" /></div>
           </div>
         </div>
 
@@ -159,18 +275,18 @@
           <textarea id="note" placeholder="예: 2회차 회전 시 척골 통증↑ / 컨디션↓로 강도 낮춤"></textarea>
         </div>
 
-        <div class="row sp">
-          <button class="btn primary" id="btnSave">저장</button>
-          <span class="mini" id="saveHint">자동 저장: ON</span>
+        <div class="status">
+          <span id="statusBar">준비됨</span>
+          <span class="muted">자동 저장: ON</span>
         </div>
       </div>
     </section>
 
-    <!-- RIGHT: Calendar + Weekly angles -->
+    <!-- Calendar + Weekly -->
     <section class="card">
       <div class="calHead">
         <button class="btn" id="prevMonth">◀</button>
-        <div class="month" id="monthLabel">2025년 1월</div>
+        <div class="month" id="monthLabel">2026년 1월</div>
         <button class="btn" id="nextMonth">▶</button>
       </div>
 
@@ -184,7 +300,7 @@
       <div class="row sp">
         <div>
           <div class="h2">📐 주간 각도 체크 (선택)</div>
-          <div class="mini">주 1회 정도만 기록 권장</div>
+          <div class="muted" style="font-size:12px;">주 1회 정도만 기록 권장</div>
         </div>
         <button class="btn" id="btnSaveAngles">각도 저장</button>
       </div>
@@ -205,14 +321,8 @@
         </div>
       </div>
       <div class="cols" style="margin-top:10px;">
-        <div>
-          <label>굴곡(°)</label>
-          <input type="number" id="wk_flex" min="0" max="180" placeholder="예: 35" />
-        </div>
-        <div>
-          <label>신전(°)</label>
-          <input type="number" id="wk_ext" min="0" max="180" placeholder="예: 20" />
-        </div>
+        <div><label>굴곡(°)</label><input type="number" id="wk_flex" min="0" max="180" placeholder="예: 35" /></div>
+        <div><label>신전(°)</label><input type="number" id="wk_ext" min="0" max="180" placeholder="예: 20" /></div>
       </div>
       <div style="margin-top:10px;">
         <label>느낌 한 줄</label>
@@ -231,30 +341,66 @@
   </div>
 </div>
 
-<div class="footbar">
-  <div class="wrap2">
-    <div class="mini" id="statusBar">준비됨</div>
-    <div class="row">
-      <button class="btn" id="btnInstallHint">홈 화면 추가 안내</button>
+<!-- Guide Modal -->
+<div class="modalBack" id="guideBack" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-label="기본 운동 지침">
+    <div class="modalTop">
+      <div style="font-weight:950;">기본 운동 지침</div>
+      <button class="btn ghost" id="btnGuideClose">닫기</button>
+    </div>
+    <div class="modalBody">
+      <div class="guideBox">
+        <p class="gTitle">🧠 기본 원칙</p>
+        <ul class="gList">
+          <li>하루 <b>3회</b> · 1회 <b>60분</b> (한 번에 길게 하거나 쪼개도 되지만, “총량”을 지키는 게 핵심)</li>
+          <li><b>천천히</b> + <b>반동 금지</b> (끝각도에서 2~3초 유지)</li>
+          <li>“당김/뻐근함”은 OK, <b>찌르는 통증</b>·<b>저릿한 전기감</b>·<b>갑자기 힘 빠짐</b>은 즉시 중단</li>
+          <li>운동 후 <b>붓기/열감</b>이 올라오면 강도/시간을 낮추고 냉찜질(의사 지시 우선)</li>
+        </ul>
+      </div>
+
+      <div class="guideBox">
+        <p class="gTitle">🖐 손목(회전 포함) 핵심</p>
+        <ul class="gList">
+          <li><b>회전(회내/회외)</b>: 끝각도에서 2~3초 “유지”가 중요. 하루 누적량으로 서서히 풀림</li>
+          <li><b>굴곡/신전</b>: 가능한 범위에서 부드럽게, “끝에서 살짝 멈춤”</li>
+          <li>뼈/철물 부위의 <b>당김</b>은 흔하지만, <b>칼로 찌르는 통증</b>이 반복되면 진료 때 꼭 말하기</li>
+        </ul>
+      </div>
+
+      <div class="guideBox">
+        <p class="gTitle">✋ 손가락/엄지(힘줄 수술 후)</p>
+        <ul class="gList">
+          <li>손목을 손등 쪽으로 젖히면 손가락이 구부러지고, 손바닥 쪽으로 굽히면 손가락이 펴지는 현상은 <b>정상적인 힘줄 연동</b>일 수 있음</li>
+          <li>주먹을 쥘 때 손목이 덜 꺾이는 것도 흔함(힘줄/근육 긴장 때문)</li>
+          <li>엄지–검지 동시 움직임을 시키는 건 “새로 연결된 라인”을 안정적으로 쓰게 하려는 목적일 수 있음(담당의 지시 우선)</li>
+        </ul>
+      </div>
+
+      <div class="guideBox">
+        <p class="gTitle">🚨 “바로 병원” 기준</p>
+        <ul class="gList">
+          <li>통증이 <b>날마다 증가</b>하거나, 운동 후 <b>붓기/열감</b>이 뚜렷해짐</li>
+          <li>손/손가락 <b>감각 저하</b>가 새로 생기거나 악화, 손끝이 창백/청색으로 변함</li>
+          <li>회전이 2주 이상 “완전 정체” + 일상 기능이 급격히 떨어짐</li>
+        </ul>
+        <div class="muted" style="font-size:12px; margin-top:10px;">
+          ※ 이 지침은 “기본 원칙”이고, <b>담당 교수 지시가 최우선</b>입니다.
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
 <script>
-  const STORAGE_KEY = "wristRehab_v1";
+  const STORAGE_KEY = "wristRehab_v2";
+  const defaultData = { days: {}, weeklyAngles: [] };
 
   function pad(n){ return String(n).padStart(2,"0"); }
   function ymd(d){
     const dt = new Date(d);
     return dt.getFullYear()+"-"+pad(dt.getMonth()+1)+"-"+pad(dt.getDate());
   }
-  function parseYMD(s){
-    const [y,m,d] = s.split("-").map(Number);
-    return new Date(y, m-1, d);
-  }
-  function monthKey(y,m){ return y+"-"+pad(m+1); }
-
-  const defaultData = { days: {}, weeklyAngles: [] };
 
   function loadData(){
     try{
@@ -270,10 +416,10 @@
 
   let data = loadData();
   let selectedDate = new Date();
-  let viewYear = 2025;
-  let viewMonth = 0; // Jan
+  let viewYear = selectedDate.getFullYear();
+  let viewMonth = selectedDate.getMonth();
 
-  // ---------- UI refs ----------
+  // UI refs
   const todayLabel = document.getElementById("todayLabel");
   const progressKpi = document.getElementById("progressKpi");
   const monthLabel = document.getElementById("monthLabel");
@@ -314,7 +460,6 @@
     }
     return data.days[key];
   }
-
   function calcDone(day){
     const d = day?.sessions || [];
     return d.filter(s=>s.done).length;
@@ -338,9 +483,7 @@
     fields.s3_done.checked = !!day.sessions[2].done;
 
     fields.note.value = day.note || "";
-
     progressKpi.textContent = calcDone(day) + "/3";
-    highlightCalendar();
   }
 
   function readFormToData(){
@@ -357,22 +500,19 @@
     saveData(data);
     progressKpi.textContent = calcDone(data.days[ymd(selectedDate)]) + "/3";
     statusBar.textContent = "저장됨 · " + new Date().toLocaleTimeString();
-    highlightCalendar();
+    renderCalendar(); // 캘린더 표시 갱신
   }
 
-  // Autosave on changes
   Object.values(fields).forEach(el=>{
     el.addEventListener("input", autoSave);
     el.addEventListener("change", autoSave);
   });
 
-  // Manual save
   document.getElementById("btnSave").addEventListener("click", ()=>{
     autoSave();
     alert("저장 완료");
   });
 
-  // Reset day
   document.getElementById("btnResetDay").addEventListener("click", ()=>{
     if(!confirm("오늘 기록을 초기화할까요?")) return;
     const key = ymd(selectedDate);
@@ -382,31 +522,33 @@
     };
     saveData(data);
     renderToday();
+    renderCalendar();
     statusBar.textContent = "오늘 초기화됨";
   });
 
   document.getElementById("btnToday").addEventListener("click", ()=>{
     selectedDate = new Date();
+    viewYear = selectedDate.getFullYear();
+    viewMonth = selectedDate.getMonth();
+    renderCalendar();
     renderToday();
   });
 
-  // -------- Calendar ----------
+  // Calendar
   function renderCalendar(){
     calendarEl.innerHTML = "";
     monthLabel.textContent = `${viewYear}년 ${viewMonth+1}월`;
 
     const first = new Date(viewYear, viewMonth, 1);
-    const startDay = first.getDay(); // 0=Sun
+    const startDay = first.getDay();
     const daysInMonth = new Date(viewYear, viewMonth+1, 0).getDate();
     const prevDays = new Date(viewYear, viewMonth, 0).getDate();
 
-    // 6 rows x 7 = 42 cells
     for(let i=0;i<42;i++){
       const cell = document.createElement("div");
       cell.className = "day";
 
       let dayNum, cellDate, off=false;
-
       if(i < startDay){
         dayNum = prevDays - (startDay - 1 - i);
         cellDate = new Date(viewYear, viewMonth-1, dayNum);
@@ -422,7 +564,6 @@
 
       const key = ymd(cellDate);
       const day = data.days[key];
-      const doneCount = day ? calcDone(day) : 0;
 
       const d = document.createElement("div");
       d.className = "d";
@@ -431,8 +572,6 @@
 
       const marks = document.createElement("div");
       marks.className = "marks";
-
-      // 3 small squares (done / partial)
       for(let k=0;k<3;k++){
         const m = document.createElement("div");
         m.className = "m";
@@ -451,22 +590,15 @@
 
       cell.addEventListener("click", ()=>{
         selectedDate = cellDate;
-        // if clicking off-month, jump month view too
         viewYear = selectedDate.getFullYear();
         viewMonth = selectedDate.getMonth();
         renderCalendar();
         renderToday();
+        window.scrollTo({top:0, behavior:"smooth"});
       });
 
       calendarEl.appendChild(cell);
     }
-
-    highlightCalendar();
-  }
-
-  function highlightCalendar(){
-    // optional: could highlight selected day visually by re-rendering,
-    // but we keep it simple to avoid heavy DOM. (calendar already shows today outline)
   }
 
   document.getElementById("prevMonth").addEventListener("click", ()=>{
@@ -480,7 +612,6 @@
     renderCalendar();
   });
 
-  // -------- Weekly angles ----------
   document.getElementById("btnSaveAngles").addEventListener("click", ()=>{
     const item = {
       date: ymd(new Date()),
@@ -496,7 +627,7 @@
     alert("주간 각도 기록 저장 완료");
   });
 
-  // -------- Export / Import ----------
+  // Export/Import
   document.getElementById("btnExport").addEventListener("click", ()=>{
     const blob = new Blob([JSON.stringify(data, null, 2)], {type:"application/json"});
     const a = document.createElement("a");
@@ -505,11 +636,9 @@
     a.click();
     URL.revokeObjectURL(a.href);
   });
-
   document.getElementById("btnImport").addEventListener("click", ()=>{
     document.getElementById("importFile").click();
   });
-
   document.getElementById("importFile").addEventListener("change", async (e)=>{
     const file = e.target.files?.[0];
     if(!file) return;
@@ -529,10 +658,19 @@
     }
   });
 
-  // -------- Install hint ----------
-  document.getElementById("btnInstallHint").addEventListener("click", ()=>{
-    alert("아이폰 Safari에서 열기 → 공유 버튼 → '홈 화면에 추가'를 누르면 앱처럼 사용할 수 있어요.");
-  });
+  // Guide modal
+  const guideBack = document.getElementById("guideBack");
+  function openGuide(){
+    guideBack.style.display = "flex";
+    guideBack.setAttribute("aria-hidden","false");
+  }
+  function closeGuide(){
+    guideBack.style.display = "none";
+    guideBack.setAttribute("aria-hidden","true");
+  }
+  document.getElementById("btnGuide").addEventListener("click", openGuide);
+  document.getElementById("btnGuideClose").addEventListener("click", closeGuide);
+  guideBack.addEventListener("click", (e)=>{ if(e.target === guideBack) closeGuide(); });
 
   // Service worker register
   if("serviceWorker" in navigator){
@@ -552,3 +690,4 @@
 </script>
 </body>
 </html>
+
